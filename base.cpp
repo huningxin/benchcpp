@@ -40,6 +40,7 @@ static uint64_t computeIterations(Base::Benchmark *benchmark) {
     simdTime = timeKernel(benchmark->config->kernelSimd, testIterations);
     nonSimdTime = timeKernel(benchmark->config->kernelNonSimd, testIterations);
     maxTime = simdTime > nonSimdTime ? simdTime : nonSimdTime;
+    printf("testIterations: %llu, maxTime: %llu\n", testIterations, maxTime);
   }
   maxTime = simdTime > nonSimdTime ? simdTime : nonSimdTime;
 
