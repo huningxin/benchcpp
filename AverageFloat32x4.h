@@ -21,6 +21,8 @@ class AverageFloat32x4 : public Base::Benchmark {
         average,
         1000)) {}
 
+  static uint64_t preventOptimize;
+
   static const uint32_t length = 10000;
   static float a[length];
 
@@ -41,6 +43,7 @@ class AverageFloat32x4 : public Base::Benchmark {
   };
 
   static float simdAverageKernel() {
+    preventOptimize++;
     __m128 sumx4 = _mm_set_ps1(0.0);
     for (uint32_t j = 0, l = length; j < l; j = j + 4) {
       sumx4 = _mm_add_ps(sumx4, _mm_loadu_ps(&(a[j])));
@@ -49,9 +52,8 @@ class AverageFloat32x4 : public Base::Benchmark {
   }
 
   static float nonSimdAverageKernel() {
+    preventOptimize++;
     float sum = 0.0;
-    #pragma loop(no_vector)
-    #pragma nounroll
     for (uint32_t j = 0, l = length; j < l; ++j) {
       sum += a[j];
     }
@@ -76,6 +78,7 @@ class AverageFloat32x4 : public Base::Benchmark {
 
 };
 
+uint64_t AverageFloat32x4::preventOptimize = 0;
 float AverageFloat32x4::a[AverageFloat32x4::length];
 
 #endif
