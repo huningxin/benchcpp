@@ -79,6 +79,20 @@ static bool runOne(Base::Benchmark *benchmark) {
   return true;
 }
 
+static void printHeaders(Base::PrintFunction printFunction) {
+  char buf[200];
+  sprintf_s(buf, "%-20s : %12s %12s %12s %12s %10s %10s",
+            "Name", "Iterations", "Scalar32(ns)", "Scalar64(ns)", "SIMD32(ns)", "Ratio32", "Ratio64");
+  printFunction(buf);
+}
+
+static void printColumns(Base::PrintFunction printFunction, const char *name, uint64_t iterations, uint64_t scalar32, uint64_t scalar64, uint64_t simd32, double ratio32, double ratio64) {
+  char buf[200];
+  sprintf_s(buf, "%-20s : %12llu %12llu %12llu %12llu %10.2f %10.2f",
+            name, iterations, scalar32, scalar64, simd32, ratio32, ratio64);
+  printFunction(buf);
+}
+
 static void report(Base::Benchmark *benchmark, Base::OutputFunctions &outputFunctions) {
   char buf[200];
   if (!benchmark->initOk) {
@@ -91,17 +105,22 @@ static void report(Base::Benchmark *benchmark, Base::OutputFunctions &outputFunc
     outputFunctions.printError(buf);
     return;
   }
-  double ratio = (double)benchmark->nonSimdTime / (double)benchmark->simdTime;
-  sprintf_s(buf, "%-23s : Iterations(%10llu), SIMD(%8llums), Non-SIMD(%8llums), Speedup(%.3f)",
-            benchmark->config->kernelName.c_str(),
-            benchmark->actualIterations,
-            benchmark->simdTime, 
-            benchmark->nonSimdTime, ratio);
-  outputFunctions.printResult(buf);
+  double ratio32 = (double)benchmark->nonSimdTime / (double)benchmark->simdTime;
+  double ratio64 = (double)benchmark->nonSimdTime / (double)benchmark->simdTime;
+  printColumns(
+    outputFunctions.printResult,
+    benchmark->config->kernelName.c_str(),
+    benchmark->actualIterations,
+    benchmark->nonSimdTime*1000*1000/benchmark->actualIterations,
+    benchmark->nonSimdTime*1000*1000/benchmark->actualIterations,
+    benchmark->simdTime*1000*1000/benchmark->actualIterations,
+    ratio32,
+    ratio64);
 }
 
 void Base::Benchmarks::runAll(Base::OutputFunctions &outputFunctions, bool useAutoIterations) {
 //  printf("runAll\n");
+  printHeaders(outputFunctions.printResult);
   for (BenchmarkList::iterator it = benchmarkList.begin(); it != benchmarkList.end(); it++) {
     Base::Benchmark *benchmark = *it;
 //    printf("Running: %s\n", benchmark->config->kernelName.c_str());
