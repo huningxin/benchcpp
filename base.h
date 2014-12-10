@@ -33,7 +33,7 @@ class OutputFunctions {
 
 class Configuration {
  public:
-  Configuration(string         &name,
+  Configuration(string         name,
                 InitFunction    init,
                 CleanupFunction cleanup,
                 KernelFunction  simd,

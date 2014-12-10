@@ -135,10 +135,10 @@ class Mandelbrot : public Base::Benchmark {
     uint64_t result = 0;
     for (uint64_t i = 0; i < n; ++i) {
       __m128i r = mandelx4(vec0, vec0, 100);
-      result = r.m128i_u32[0];
-      result = r.m128i_u32[1] | result << 8;
-      result = r.m128i_u32[2] | result << 8;
-      result = r.m128i_u32[3] | result << 8;
+      result = r[0];
+      result = r[1] | result << 8;
+      result = r[2] | result << 8;
+      result = r[3] | result << 8;
     }
     return result;
   }
