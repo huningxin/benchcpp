@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <xmmintrin.h>
 #include <math.h>
 #include "base.h"
 

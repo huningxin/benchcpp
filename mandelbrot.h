@@ -5,8 +5,6 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <emmintrin.h>
-#include <xmmintrin.h>
 #include "base.h"
 
 class Mandelbrot : public Base::Benchmark {
