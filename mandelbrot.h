@@ -133,12 +133,13 @@ class Mandelbrot : public Base::Benchmark {
   static uint64_t simdMandelbrot (uint64_t n) {
     __m128   vec0   = _mm_set_ps1(0.01f);
     uint64_t result = 0;
+    uint32_t tmp = 0;
     for (uint64_t i = 0; i < n; ++i) {
       __m128i r = mandelx4(vec0, vec0, 100);
-      result = r[0];
-      result = r[1] | result << 8;
-      result = r[2] | result << 8;
-      result = r[3] | result << 8;
+      result = (uint32_t) r[0];
+      result = ((uint32_t) r[1]) | result << 8;
+      result = ((uint32_t) r[2]) | result << 8;
+      result = ((uint32_t) r[3]) | result << 8;
     }
     return result;
   }

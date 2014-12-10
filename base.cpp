@@ -14,8 +14,8 @@ typedef list<Base::Benchmark *> BenchmarkList;
 static BenchmarkList benchmarkList;
 
 static uint64_t now() {
-  struct _timeb time;
-  _ftime_s(&time);
+  struct timeb time;
+  ftime(&time);
   return time.time*1000 + time.millitm;
 }
 
@@ -82,14 +82,14 @@ static bool runOne(Base::Benchmark *benchmark) {
 
 static void printHeaders(Base::PrintFunction printFunction) {
   char buf[200];
-  sprintf_s(buf, "%-20s : %12s %12s %12s %12s %10s %10s",
+  sprintf(buf, "%-20s : %12s %12s %12s %12s %10s %10s",
             "Name", "Iterations", "Scalar32(ns)", "Scalar64(ns)", "SIMD32(ns)", "Ratio32", "Ratio64");
   printFunction(buf);
 }
 
 static void printColumns(Base::PrintFunction printFunction, const char *name, uint64_t iterations, uint64_t scalar32, uint64_t scalar64, uint64_t simd32, double ratio32, double ratio64) {
   char buf[200];
-  sprintf_s(buf, "%-20s : %12llu %12llu %12llu %12llu %10.2f %10.2f",
+  sprintf(buf, "%-20s : %12llu %12llu %12llu %12llu %10.2f %10.2f",
             name, iterations, scalar32, scalar64, simd32, ratio32, ratio64);
   printFunction(buf);
 }
@@ -97,12 +97,12 @@ static void printColumns(Base::PrintFunction printFunction, const char *name, ui
 static void report(Base::Benchmark *benchmark, Base::OutputFunctions &outputFunctions) {
   char buf[200];
   if (!benchmark->initOk) {
-    sprintf_s(buf, "%s: %s", benchmark->config->kernelName.c_str(), "FAILED INIT");
+    sprintf(buf, "%s: %s", benchmark->config->kernelName.c_str(), "FAILED INIT");
     outputFunctions.printError(buf);
     return;
   }
   if (!benchmark->cleanupOk) {
-    sprintf_s(buf, "%s: %s", benchmark->config->kernelName.c_str(), "FAILED CLEANUP");
+    sprintf(buf, "%s: %s", benchmark->config->kernelName.c_str(), "FAILED CLEANUP");
     outputFunctions.printError(buf);
     return;
   }
