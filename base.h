@@ -37,20 +37,23 @@ class Configuration {
                 InitFunction    init,
                 CleanupFunction cleanup,
                 KernelFunction  simd,
-                KernelFunction  nonSimd,
+                KernelFunction  nonSimd32,
+                KernelFunction  nonSimd64,
                 uint64_t        iterations) :
     kernelName(name),
     kernelInit(init),
     kernelCleanup(cleanup),
     kernelSimd(simd),
-    kernelNonSimd(nonSimd),
+    kernelNonSimd32(nonSimd32),
+    kernelNonSimd64(nonSimd64),
     kernelIterations(iterations) {};
 
   string           kernelName;
   InitFunction     kernelInit;
   CleanupFunction  kernelCleanup;
   KernelFunction   kernelSimd;
-  KernelFunction   kernelNonSimd;
+  KernelFunction   kernelNonSimd32;
+  KernelFunction   kernelNonSimd64;
   uint64_t         kernelIterations;
 };
 
@@ -79,7 +82,8 @@ class Benchmark {
   uint64_t       autoIterations;
   uint64_t       actualIterations;
   uint64_t       simdTime;
-  uint64_t       nonSimdTime;
+  uint64_t       nonSimd32Time;
+  uint64_t       nonSimd64Time;
 };
 
 }

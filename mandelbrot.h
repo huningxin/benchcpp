@@ -18,12 +18,13 @@ class Mandelbrot : public Base::Benchmark {
         initMandelbrot,
         cleanupMandelbrot,
         simdMandelbrot,
-        nonSimdMandelbrot,
+        nonSimdMandelbrot32, // 32
+        nonSimdMandelbrot64, // 64
         1000)) {}
 
   static uint64_t preventOptimize;
 
-  static uint32_t mandelx1(float c_re, float c_im, uint32_t max_iterations) {
+  static uint32_t mandelx132(float c_re, float c_im, uint32_t max_iterations) {
     preventOptimize++;
     float    z_re = c_re;
     float    z_im = c_im;
@@ -37,6 +38,26 @@ class Mandelbrot : public Base::Benchmark {
 
       float new_re = z_re2 - z_im2;
       float new_im = 2.0f*z_re*z_im;
+      z_re = c_re + new_re;
+      z_im = c_im + new_im;
+    }
+    return i;
+  };
+
+  static uint32_t mandelx164(double c_re, double c_im, uint32_t max_iterations) {
+    preventOptimize++;
+    double    z_re = c_re;
+    double    z_im = c_im;
+    uint32_t i;
+    for (i = 0; i < max_iterations; ++i) {
+      double z_re2 = z_re*z_re;
+      double z_im2 = z_im*z_im;
+      if (z_re2 + z_im2 > 4.0f) {
+        break;
+      }
+
+      double new_re = z_re2 - z_im2;
+      double new_im = 2.0f*z_re*z_im;
       z_re = c_re + new_re;
       z_im = c_im + new_im;
     }
@@ -70,9 +91,11 @@ class Mandelbrot : public Base::Benchmark {
   };
 
   static bool sanityCheck() {
-    uint64_t simd    = simdMandelbrot(1);
-    uint64_t nonSimd = nonSimdMandelbrot(1);
-    return simd == nonSimd;
+    uint64_t simd      = simdMandelbrot(1);
+    uint64_t nonSimd32 = nonSimdMandelbrot32(1);
+    uint64_t nonSimd64 = nonSimdMandelbrot64(1);
+    return simd == nonSimd32 &&
+           simd == nonSimd64;
   }
 
   static bool initMandelbrot() {
@@ -83,14 +106,25 @@ class Mandelbrot : public Base::Benchmark {
     return sanityCheck();
   }
 
-  // Non SIMD version of the kernel
-  static uint64_t nonSimdMandelbrot (uint64_t n) {
+  // Non SIMD versions of the kernel
+  static uint64_t nonSimdMandelbrot32 (uint64_t n) {
     uint64_t result = 0;
     for (uint64_t i = 0; i < n; ++i) {
-      result = mandelx1(0.01f, 0.01f, 100);
-      result = mandelx1(0.01f, 0.01f, 100) | result << 8;
-      result = mandelx1(0.01f, 0.01f, 100) | result << 8;
-      result = mandelx1(0.01f, 0.01f, 100) | result << 8;
+      result = mandelx132(0.01f, 0.01f, 100);
+      result = mandelx132(0.01f, 0.01f, 100) | result << 8;
+      result = mandelx132(0.01f, 0.01f, 100) | result << 8;
+      result = mandelx132(0.01f, 0.01f, 100) | result << 8;
+    }
+    return result;
+  }
+
+  static uint64_t nonSimdMandelbrot64 (uint64_t n) {
+    uint64_t result = 0;
+    for (uint64_t i = 0; i < n; ++i) {
+      result = mandelx164(0.01, 0.01, 100);
+      result = mandelx164(0.01, 0.01, 100) | result << 8;
+      result = mandelx164(0.01, 0.01, 100) | result << 8;
+      result = mandelx164(0.01, 0.01, 100) | result << 8;
     }
     return result;
   }

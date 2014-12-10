@@ -18,7 +18,8 @@ class AverageFloat32x4 : public Base::Benchmark {
         initArray,
         cleanup,
         simdAverage,
-        average,
+        average32,
+        average64,
         1000)) {}
 
   static uint64_t preventOptimize;
@@ -27,7 +28,11 @@ class AverageFloat32x4 : public Base::Benchmark {
   static float a[length];
 
   static bool sanityCheck() {
-    return fabs(simdAverageKernel() - nonSimdAverageKernel()) < 0.0001;
+    float simdVal      = simdAverageKernel();
+    float nonSimd32Val = nonSimdAverageKernel32();
+    float nonSimd64Val = (float) nonSimdAverageKernel64();
+    return fabs(simdVal - nonSimd32Val) < 0.0001 &&
+           fabs(simdVal - nonSimd64Val) < 0.0001;
   }
 
   static bool initArray() {
@@ -51,11 +56,20 @@ class AverageFloat32x4 : public Base::Benchmark {
     return (sumx4.m128_f32[0] + sumx4.m128_f32[1] + sumx4.m128_f32[2] + sumx4.m128_f32[3])/length;
   }
 
-  static float nonSimdAverageKernel() {
+  static float nonSimdAverageKernel32() {
     preventOptimize++;
     float sum = 0.0;
     for (uint32_t j = 0, l = length; j < l; ++j) {
       sum += a[j];
+    }
+    return sum/length;
+  }
+
+  static double nonSimdAverageKernel64() {
+    preventOptimize++;
+    double sum = 0.0;
+    for (uint32_t j = 0, l = length; j < l; ++j) {
+      sum += (double)a[j];
     }
     return sum/length;
   }
@@ -68,10 +82,18 @@ class AverageFloat32x4 : public Base::Benchmark {
     return (uint64_t)val;
   };
 
-  static uint64_t average(uint64_t n) {
+  static uint64_t average32(uint64_t n) {
     float val;
     for (uint64_t i = 0; i < n; ++i) {
-      val = nonSimdAverageKernel();
+      val = nonSimdAverageKernel32();
+    }
+    return (uint64_t)val;
+  };
+
+  static uint64_t average64(uint64_t n) {
+    double val;
+    for (uint64_t i = 0; i < n; ++i) {
+      val = nonSimdAverageKernel64();
     }
     return (uint64_t)val;
   };

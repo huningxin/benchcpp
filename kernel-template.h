@@ -15,7 +15,8 @@ class KernelTemplate : public Base::Benchmark {
         init,
         cleanup,
         simd,
-        nonSimd,
+        nonSimd, // 32
+        nonSimd, // 64
         1000)) {}
 
   static uint64_t preventOptimize;

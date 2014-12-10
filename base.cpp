@@ -33,12 +33,12 @@ static uint64_t computeIterations(Base::Benchmark *benchmark) {
 
     // Make the slowest kernel run for at least 500ms
   uint64_t simdTime    = timeKernel(benchmark->config->kernelSimd, testIterations);
-  uint64_t nonSimdTime = timeKernel(benchmark->config->kernelNonSimd, testIterations);
+  uint64_t nonSimdTime = timeKernel(benchmark->config->kernelNonSimd32, testIterations);
   uint64_t maxTime     = simdTime > nonSimdTime ? simdTime : nonSimdTime;
   while (maxTime < 500) {
     testIterations *= 2;
     simdTime = timeKernel(benchmark->config->kernelSimd, testIterations);
-    nonSimdTime = timeKernel(benchmark->config->kernelNonSimd, testIterations);
+    nonSimdTime = timeKernel(benchmark->config->kernelNonSimd32, testIterations);
     maxTime = simdTime > nonSimdTime ? simdTime : nonSimdTime;
 //    printf("testIterations: %llu, maxTime: %llu\n", testIterations, maxTime);
   }
@@ -68,8 +68,9 @@ static bool runOne(Base::Benchmark *benchmark) {
   // Run the SIMD kernel
   benchmark->simdTime = timeKernel(benchmark->config->kernelSimd, benchmark->actualIterations);
 
-  // Run the non-SIMD kernel
-  benchmark->nonSimdTime = timeKernel(benchmark->config->kernelNonSimd, benchmark->actualIterations);
+  // Run the non-SIMD kernels
+  benchmark->nonSimd32Time = timeKernel(benchmark->config->kernelNonSimd32, benchmark->actualIterations);
+  benchmark->nonSimd64Time = timeKernel(benchmark->config->kernelNonSimd64, benchmark->actualIterations);
 
   // Do the final sanity check
   if (!benchmark->config->kernelCleanup()) {
@@ -105,14 +106,14 @@ static void report(Base::Benchmark *benchmark, Base::OutputFunctions &outputFunc
     outputFunctions.printError(buf);
     return;
   }
-  double ratio32 = (double)benchmark->nonSimdTime / (double)benchmark->simdTime;
-  double ratio64 = (double)benchmark->nonSimdTime / (double)benchmark->simdTime;
+  double ratio32 = (double)benchmark->nonSimd32Time / (double)benchmark->simdTime;
+  double ratio64 = (double)benchmark->nonSimd64Time / (double)benchmark->simdTime;
   printColumns(
     outputFunctions.printResult,
     benchmark->config->kernelName.c_str(),
     benchmark->actualIterations,
-    benchmark->nonSimdTime*1000*1000/benchmark->actualIterations,
-    benchmark->nonSimdTime*1000*1000/benchmark->actualIterations,
+    benchmark->nonSimd32Time*1000*1000/benchmark->actualIterations,
+    benchmark->nonSimd64Time*1000*1000/benchmark->actualIterations,
     benchmark->simdTime*1000*1000/benchmark->actualIterations,
     ratio32,
     ratio64);
