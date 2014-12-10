@@ -4,6 +4,8 @@
 #define _BASE_H
 #include <string>
 #include <stdint.h>
+#include <emmintrin.h>
+#include <xmmintrin.h>
 
 using namespace std;
 
@@ -18,6 +20,28 @@ typedef void     (*PrintFunction)(char *str);
 typedef bool     (*InitFunction)(void);
 typedef bool     (*CleanupFunction)(void);
 typedef uint64_t (*KernelFunction)(uint64_t n);
+
+typedef union {
+  float  m128_f32[4];
+  __m128 f32x4;
+} M128;
+
+#define M128_INIT(m128) Base::M128 m128##overlay; m128##overlay.f32x4 = m128
+#define M128_X(m128) (m128##overlay.m128_f32[0])
+#define M128_Y(m128) (m128##overlay.m128_f32[1])
+#define M128_Z(m128) (m128##overlay.m128_f32[2])
+#define M128_W(m128) (m128##overlay.m128_f32[3])
+
+typedef union {
+  int  m128i_i32[4];
+  __m128i i32x4;
+} M128I;
+
+#define M128I_INIT(m128i) Base::M128I m128i##overlay; m128i##overlay.i32x4 = m128i
+#define M128I_X(m128i) (m128i##overlay.m128i_i32[0])
+#define M128I_Y(m128i) (m128i##overlay.m128i_i32[1])
+#define M128I_Z(m128i) (m128i##overlay.m128i_i32[2])
+#define M128I_W(m128i) (m128i##overlay.m128i_i32[3])
 
 class OutputFunctions {
  public:
