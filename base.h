@@ -21,6 +21,31 @@ typedef bool     (*InitFunction)(void);
 typedef bool     (*CleanupFunction)(void);
 typedef uint64_t (*KernelFunction)(uint64_t n);
 
+template<typename X4, typename X>
+class Lanes {
+ private:
+  union {
+    X4  m128;
+    X   lanes[4];
+  } lanes;
+ public:
+  Lanes(X4 m128) {
+    lanes.m128 = m128;
+  }
+  X x() {
+    return lanes.lanes[0];
+  }
+  X y() {
+    return lanes.lanes[1];
+  }
+  X z() {
+    return lanes.lanes[2];
+  }
+  X w() {
+    return lanes.lanes[3];
+  }
+};
+
 typedef union {
   float  m128_f32[4];
   __m128 f32x4;

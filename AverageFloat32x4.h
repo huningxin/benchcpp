@@ -53,8 +53,10 @@ class AverageFloat32x4 : public Base::Benchmark {
     for (uint32_t j = 0, l = length; j < l; j = j + 4) {
       sumx4 = _mm_add_ps(sumx4, _mm_loadu_ps(&(a[j])));
     }
-    M128_INIT(sumx4);
-    return (M128_X(sumx4) + M128_Y(sumx4) + M128_Z(sumx4) + M128_W(sumx4))/length;
+    Base::Lanes<__m128, float> lanes(sumx4);
+    return (lanes.x() + lanes.y() + lanes.z() + lanes.w())/length;
+//    M128_INIT(sumx4);
+//    return (M128_X(sumx4) + M128_Y(sumx4) + M128_Z(sumx4) + M128_W(sumx4))/length;
   }
 
   static float nonSimdAverageKernel32() {

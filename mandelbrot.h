@@ -135,11 +135,17 @@ class Mandelbrot : public Base::Benchmark {
     uint64_t result = 0;
     for (uint64_t i = 0; i < n; ++i) {
       __m128i r = mandelx4(vec0, vec0, 100);
-      M128I_INIT(r);
-      result =  (uint32_t) M128I_X(r);
-      result = ((uint32_t) M128I_Y(r)) | result << 8;
-      result = ((uint32_t) M128I_Z(r)) | result << 8;
-      result = ((uint32_t) M128I_W(r)) | result << 8;
+      Base::Lanes<__m128i, int> lanes(r);
+      result =  (uint32_t) lanes.x();
+      result = ((uint32_t) lanes.y()) | result << 8;
+      result = ((uint32_t) lanes.z()) | result << 8;
+      result = ((uint32_t) lanes.w()) | result << 8;
+
+//      M128I_INIT(r);
+//      result =  (uint32_t) M128I_X(r);
+//      result = ((uint32_t) M128I_Y(r)) | result << 8;
+//      result = ((uint32_t) M128I_Z(r)) | result << 8;
+//      result = ((uint32_t) M128I_W(r)) | result << 8;
     }
     return result;
   }
