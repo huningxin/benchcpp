@@ -50,12 +50,12 @@ class Mandelbrot : public Base::Benchmark {
     for (i = 0; i < max_iterations; ++i) {
       double z_re2 = z_re*z_re;
       double z_im2 = z_im*z_im;
-      if (z_re2 + z_im2 > 4.0f) {
+      if (z_re2 + z_im2 > 4.0) {
         break;
       }
 
       double new_re = z_re2 - z_im2;
-      double new_im = 2.0f*z_re*z_im;
+      double new_im = 2.0*z_re*z_im;
       z_re = c_re + new_re;
       z_im = c_im + new_im;
     }
