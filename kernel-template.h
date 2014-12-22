@@ -19,8 +19,6 @@ class KernelTemplate : public Base::Benchmark {
         nonSimd, // 64
         1000)) {}
 
-  static uint64_t preventOptimize;
-
   static bool init() {
     return true;
   };
@@ -30,25 +28,21 @@ class KernelTemplate : public Base::Benchmark {
   };
 
   static uint64_t simd(uint64_t n) {
-    uint64_t s = 0;
+    volatile uint64_t s = 0;
     for (uint64_t i = 0; i < n; ++i) {
-      preventOptimize++;
       s += i;
     }
     return s;
   };
 
   static uint64_t nonSimd(uint64_t n) {
-    uint64_t s = 0;
+    volatile uint64_t s = 0;
     for (uint64_t i = 0; i < n; ++i) {
-      preventOptimize++;
       s += i;
     }
     return s;
   };
 
 };
-
-uint64_t KernelTemplate::preventOptimize = 0;
 
 #endif
