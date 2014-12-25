@@ -7,6 +7,7 @@
 #include "mandelbrot.h"
 #include "matrix_multiplication.h"
 #include "vertex_transform.h"
+#include "matrix_transpose.h"
 
 void printResult(char *str) {
   printf("%s\n", str);
@@ -27,6 +28,7 @@ int main() {
   Mandelbrot        mandelbrot;
   MatrixMultiplication matrixMultiplication;
   VertexTransform vertexTransform;
+  MatrixTranspose matrixTranspose;
 
   // Execute the benchmarks declared above
   Base::benchmarks.runAll(outputFunctions, true);
