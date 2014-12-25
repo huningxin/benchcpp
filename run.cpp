@@ -5,6 +5,7 @@
 #include "kernel-template.h"
 #include "AverageFloat32x4.h"
 #include "mandelbrot.h"
+#include "matrix_multiplication.h"
 
 void printResult(char *str) {
   printf("%s\n", str);
@@ -23,6 +24,7 @@ int main() {
   KernelTemplate    kernelTemplate;
   AverageFloat32x4  averageFloat32x4;
   Mandelbrot        mandelbrot;
+  MatrixMultiplication matrixMultiplication;
 
   // Execute the benchmarks declared above
   Base::benchmarks.runAll(outputFunctions, true);
