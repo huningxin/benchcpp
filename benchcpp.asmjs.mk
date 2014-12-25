@@ -17,4 +17,4 @@ benchcpp.js: benchcpp.js.bc
 	$(EMCC) -O2 -g -s ASM_JS=1 -s TOTAL_MEMORY=$(HEAP) $< -o $@
 
 clean:
-	rm benchcpp.js benchcpp.js.bc $(OBJECTS)
+	del benchcpp.js benchcpp.js.bc $(OBJECTS)
