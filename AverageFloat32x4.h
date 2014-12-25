@@ -43,6 +43,9 @@ class AverageFloat32x4 : public Base::Benchmark {
   }
 
   static bool cleanup() {
+    for (uint32_t i = 0; i < length; ++i) {
+      a[i] = 0.1f;
+    }
     return sanityCheck();
   };
 
