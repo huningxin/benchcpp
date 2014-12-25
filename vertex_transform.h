@@ -167,7 +167,7 @@ class VertexTransform : public Base::Benchmark {
       __m128 yyyy = _mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1));
       z = _mm_add_ps(z, _mm_mul_ps(yyyy, _mm_loadu_ps(&tx4[4])));
       __m128 zzzz = _mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2));
-      z = _mm_add_ps(z, _mm_mul_ps(yyyy, _mm_loadu_ps(&tx4[8])));
+      z = _mm_add_ps(z, _mm_mul_ps(zzzz, _mm_loadu_ps(&tx4[8])));
       __m128 wwww = _mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3));
       z = _mm_add_ps(z, _mm_mul_ps(wwww, _mm_loadu_ps(&tx4[12])));
       _mm_storeu_ps(&outx4[0], z);

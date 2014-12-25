@@ -22,10 +22,10 @@ int main() {
   Base::OutputFunctions outputFunctions(printResult, printError, printScore);
 
   // The constructor for each of these objects will result in the benchmark being executed
-  //KernelTemplate    kernelTemplate;
-  //AverageFloat32x4  averageFloat32x4;
-  //Mandelbrot        mandelbrot;
-  //MatrixMultiplication matrixMultiplication;
+  KernelTemplate    kernelTemplate;
+  AverageFloat32x4  averageFloat32x4;
+  Mandelbrot        mandelbrot;
+  MatrixMultiplication matrixMultiplication;
   VertexTransform vertexTransform;
 
   // Execute the benchmarks declared above
