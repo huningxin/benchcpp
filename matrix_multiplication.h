@@ -1,4 +1,5 @@
 // Author: Ningxin Hu
+// This is file is based on https://github.com/johnmccutchan/ecmascript_simd/blob/master/src/benchmarks/matrix-multiplication.js
 
 #ifndef _MATRIX_MULTIPLICATION_H
 #define _MATRIX_MULTIPLICATION_H

@@ -1,4 +1,5 @@
 // Author: Ningxin Hu
+// This file is based on https://github.com/johnmccutchan/ecmascript_simd/blob/master/src/benchmarks/transpose4x4.js
 
 #ifndef _MATRIX_TRANSPOSE_H
 #define _MATRIX_TRANSPOSE_H

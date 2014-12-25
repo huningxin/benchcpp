@@ -1,4 +1,5 @@
 // Author: Ningxin Hu
+// This file is based on https://github.com/johnmccutchan/ecmascript_simd/blob/master/src/benchmarks/transform.js
 
 #ifndef _VERTEX_TRANSFORM_H
 #define _VERTEX_TRANSFORM_H
