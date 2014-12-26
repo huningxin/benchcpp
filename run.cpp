@@ -6,6 +6,7 @@
 #include "AverageFloat32x4.h"
 #include "mandelbrot.h"
 #include "matrix_multiplication.h"
+#include "vertex_transform.h"
 
 void printResult(char *str) {
   printf("%s\n", str);
@@ -21,10 +22,11 @@ int main() {
   Base::OutputFunctions outputFunctions(printResult, printError, printScore);
 
   // The constructor for each of these objects will result in the benchmark being executed
-  KernelTemplate    kernelTemplate;
-  AverageFloat32x4  averageFloat32x4;
-  Mandelbrot        mandelbrot;
-  MatrixMultiplication matrixMultiplication;
+  //KernelTemplate    kernelTemplate;
+  //AverageFloat32x4  averageFloat32x4;
+  //Mandelbrot        mandelbrot;
+  //MatrixMultiplication matrixMultiplication;
+  VertexTransform vertexTransform;
 
   // Execute the benchmarks declared above
   Base::benchmarks.runAll(outputFunctions, true);
