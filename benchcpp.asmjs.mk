@@ -1,4 +1,4 @@
-EMCC=$(EMSCRIPTEN)/emcc -DNDEBUG=1 -I./
+EMCC=$(EMSCRIPTEN)/emcc --memory-init-file 0 -s PRECISE_F32=1 -DNDEBUG=1 -I./
 HEAP=570425344
 
 OBJECTS = \
