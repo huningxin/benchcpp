@@ -25,13 +25,18 @@ class MatrixInverse : public Base::Benchmark {
   static uint64_t preventOptimize;
 
   static float* src;            // Source matrix
+  static double* src64;
   static float* srcx4;  // Source matrix
   static float* dst;            // Result matrix
+  static double* dst64;
   static float* dstx4;  // Result matrix
   static float* tsrc;            // Transposed version of 'src'
+  static double* tsrc64;
   static float* tsrcx4; // Transposed version of 'src'
   static float* tmp;             // Temporary array of multiply results
+  static double* tmp64;
   static float* ident;
+  static double* ident64;
 
   static void printMatrix(const float* matrix) {
     for (int r = 0; r < 4; ++r) {
@@ -53,7 +58,24 @@ class MatrixInverse : public Base::Benchmark {
     matrix [12] = -1; matrix[13] = -2; matrix[14] =  0; matrix[15] = -4;
   }
 
+  static void initMatrix64(double* matrix) {
+    // These values were chosen somewhat randomly, but they will at least yield a solution.
+    matrix [0]  =  0;  matrix[1] =  1; matrix[2]  =  2; matrix[3]  =  3;
+    matrix [4]  = -1; matrix[5]  = -2; matrix[6]  = -3; matrix[7]  = -4;
+    matrix [8]  =  0;  matrix[9] =  0; matrix[10] =  2; matrix[11] =  3;
+    matrix [12] = -1; matrix[13] = -2; matrix[14] =  0; matrix[15] = -4;
+  }
+
   static void mulMatrix(float* dst, const float* op1, const float* op2) {
+    for (int r = 0; r < 4; ++r) {
+      for (int c = 0; c < 4; ++c) {
+        int ri = 4*r;
+        dst[ri + c] = op1[ri]*op2[c] + op1[ri+1]*op2[c+4] + op1[ri+2]*op2[c+8] + op1[ri+3]*op2[c+12];
+      }
+    }
+  }
+
+  static void mulMatrix64(double* dst, const double* op1, const double* op2) {
     for (int r = 0; r < 4; ++r) {
       for (int c = 0; c < 4; ++c) {
         int ri = 4*r;
@@ -74,25 +96,54 @@ class MatrixInverse : public Base::Benchmark {
     return true;
   }
 
+  static bool checkMatrix64(double* matrix) {
+    // when multiplied with the src matrix it should yield the identity matrix
+    mulMatrix64(tsrc64, src64, matrix);
+    for (int i = 0; i < 16; ++i) {
+      if (fabs (tsrc[i] - ident[i]) > 0.00001) {
+        return false;
+      }
+    }
+    // printMatrix (tsrc);
+    return true;
+  }
+
   static bool init() {
     src = new float[16];
     srcx4 = src;
+    src64 = new double[16];
     dst = new float[16];
     dstx4 = dst;
+    dst64 = new double[16];
     tsrc = new float[16];
+    tsrc64 = new double[16];
     tsrcx4 = tsrc;
     tmp = new float[12];
+    tmp64 = new double[12];
     ident = new float[16];
     ident[0] = 1;
     ident[5] = 1;
     ident[10] = 1;
     ident[15] = 1;
+    ident64 = new double[16];
+    ident64[0] = 1;
+    ident64[5] = 1;
+    ident64[10] = 1;
+    ident64[15] = 1;
 
     initMatrix(src);
     // printMatrix(src);
     matrixInverse32(1);
     // printMatrix(dst);
     if (!checkMatrix(dst)) {
+      return false;
+    }
+
+    initMatrix64(src64);
+    // printMatrix(src);
+    matrixInverse64(1);
+    // printMatrix(dst);
+    if (!checkMatrix64(dst64)) {
       return false;
     }
 
@@ -116,6 +167,14 @@ class MatrixInverse : public Base::Benchmark {
       ret = false;
     }
 
+    initMatrix64(src64);
+    // printMatrix(src);
+    matrixInverse64(1);
+    // printMatrix(dst);
+    if (!checkMatrix64(dst64)) {
+      ret = false;
+    }
+
     initMatrix(src);
     simdMatrixInverse(1);
     // printMatrix(dst);
@@ -124,10 +183,15 @@ class MatrixInverse : public Base::Benchmark {
     }
 
     delete[] src;
+    delete[] src64;
     delete[] dst;
+    delete[] dst64;
     delete[] tsrc;
+    delete[] tsrc64;
     delete[] tmp;
+    delete[] tmp64;
     delete[] ident;
+    delete[] ident64;
 
     return ret;
   }
@@ -223,83 +287,83 @@ class MatrixInverse : public Base::Benchmark {
     for (uint64_t iterations = 0; iterations < n; ++iterations) {
       // Transpose the source matrix
       for (int i = 0; i < 4; i++) {
-        tsrc[i] = src[i * 4];
-        tsrc[i + 4] = src[i * 4 + 1];
-        tsrc[i + 8] = src[i * 4 + 2];
-        tsrc[i + 12] = src[i * 4 + 3];
+        tsrc64[i] = src64[i * 4];
+        tsrc64[i + 4] = src64[i * 4 + 1];
+        tsrc64[i + 8] = src64[i * 4 + 2];
+        tsrc64[i + 12] = src64[i * 4 + 3];
       }
 
       // Calculate pairs for first 8 elements (cofactors)
-      tmp[0] = tsrc[10] * tsrc[15];
-      tmp[1] = tsrc[11] * tsrc[14];
-      tmp[2] = tsrc[9] * tsrc[15];
-      tmp[3] = tsrc[11] * tsrc[13];
-      tmp[4] = tsrc[9] * tsrc[14];
-      tmp[5] = tsrc[10] * tsrc[13];
-      tmp[6] = tsrc[8] * tsrc[15];
-      tmp[7] = tsrc[11] * tsrc[12];
-      tmp[8] = tsrc[8] * tsrc[14];
-      tmp[9] = tsrc[10] * tsrc[12];
-      tmp[10] = tsrc[8] * tsrc[13];
-      tmp[11] = tsrc[9] * tsrc[12];
+      tmp64[0] = tsrc64[10] * tsrc64[15];
+      tmp64[1] = tsrc64[11] * tsrc64[14];
+      tmp64[2] = tsrc64[9] * tsrc64[15];
+      tmp64[3] = tsrc64[11] * tsrc64[13];
+      tmp64[4] = tsrc64[9] * tsrc64[14];
+      tmp64[5] = tsrc64[10] * tsrc64[13];
+      tmp64[6] = tsrc64[8] * tsrc64[15];
+      tmp64[7] = tsrc64[11] * tsrc64[12];
+      tmp64[8] = tsrc64[8] * tsrc64[14];
+      tmp64[9] = tsrc64[10] * tsrc64[12];
+      tmp64[10] = tsrc64[8] * tsrc64[13];
+      tmp64[11] = tsrc64[9] * tsrc64[12];
 
       // calculate first 8 elements (cofactors)
-      dst[0] = tmp[0] * tsrc[5] + tmp[3] * tsrc[6] + tmp[4] * tsrc[7];
-      dst[0] -= tmp[1] * tsrc[5] + tmp[2] * tsrc[6] + tmp[5] * tsrc[7];
-      dst[1] = tmp[1] * tsrc[4] + tmp[6] * tsrc[6] + tmp[9] * tsrc[7];
-      dst[1] -= tmp[0] * tsrc[4] + tmp[7] * tsrc[6] + tmp[8] * tsrc[7];
-      dst[2] = tmp[2] * tsrc[4] + tmp[7] * tsrc[5] + tmp[10] * tsrc[7];
-      dst[2] -= tmp[3] * tsrc[4] + tmp[6] * tsrc[5] + tmp[11] * tsrc[7];
-      dst[3] = tmp[5] * tsrc[4] + tmp[8] * tsrc[5] + tmp[11] * tsrc[6];
-      dst[3] -= tmp[4] * tsrc[4] + tmp[9] * tsrc[5] + tmp[10] * tsrc[6];
-      dst[4] = tmp[1] * tsrc[1] + tmp[2] * tsrc[2] + tmp[5] * tsrc[3];
-      dst[4] -= tmp[0] * tsrc[1] + tmp[3] * tsrc[2] + tmp[4] * tsrc[3];
-      dst[5] = tmp[0] * tsrc[0] + tmp[7] * tsrc[2] + tmp[8] * tsrc[3];
-      dst[5] -= tmp[1] * tsrc[0] + tmp[6] * tsrc[2] + tmp[9] * tsrc[3];
-      dst[6] = tmp[3] * tsrc[0] + tmp[6] * tsrc[1] + tmp[11] * tsrc[3];
-      dst[6] -= tmp[2] * tsrc[0] + tmp[7] * tsrc[1] + tmp[10] * tsrc[3];
-      dst[7] = tmp[4] * tsrc[0] + tmp[9] * tsrc[1] + tmp[10] * tsrc[2];
-      dst[7] -= tmp[5] * tsrc[0] + tmp[8] * tsrc[1] + tmp[11] * tsrc[2];
+      dst64[0] = tmp64[0] * tsrc64[5] + tmp64[3] * tsrc64[6] + tmp64[4] * tsrc64[7];
+      dst64[0] -= tmp64[1] * tsrc64[5] + tmp64[2] * tsrc64[6] + tmp64[5] * tsrc64[7];
+      dst64[1] = tmp64[1] * tsrc64[4] + tmp64[6] * tsrc64[6] + tmp64[9] * tsrc64[7];
+      dst64[1] -= tmp64[0] * tsrc64[4] + tmp64[7] * tsrc64[6] + tmp64[8] * tsrc64[7];
+      dst64[2] = tmp64[2] * tsrc64[4] + tmp64[7] * tsrc64[5] + tmp64[10] * tsrc64[7];
+      dst64[2] -= tmp64[3] * tsrc64[4] + tmp64[6] * tsrc64[5] + tmp64[11] * tsrc64[7];
+      dst64[3] = tmp64[5] * tsrc64[4] + tmp64[8] * tsrc64[5] + tmp64[11] * tsrc64[6];
+      dst64[3] -= tmp64[4] * tsrc64[4] + tmp64[9] * tsrc64[5] + tmp64[10] * tsrc64[6];
+      dst64[4] = tmp64[1] * tsrc64[1] + tmp64[2] * tsrc64[2] + tmp64[5] * tsrc64[3];
+      dst64[4] -= tmp64[0] * tsrc64[1] + tmp64[3] * tsrc64[2] + tmp64[4] * tsrc64[3];
+      dst64[5] = tmp64[0] * tsrc64[0] + tmp64[7] * tsrc64[2] + tmp64[8] * tsrc64[3];
+      dst64[5] -= tmp64[1] * tsrc64[0] + tmp64[6] * tsrc64[2] + tmp64[9] * tsrc64[3];
+      dst64[6] = tmp64[3] * tsrc64[0] + tmp64[6] * tsrc64[1] + tmp64[11] * tsrc64[3];
+      dst64[6] -= tmp64[2] * tsrc64[0] + tmp64[7] * tsrc64[1] + tmp64[10] * tsrc64[3];
+      dst64[7] = tmp64[4] * tsrc64[0] + tmp64[9] * tsrc64[1] + tmp64[10] * tsrc64[2];
+      dst64[7] -= tmp64[5] * tsrc64[0] + tmp64[8] * tsrc64[1] + tmp64[11] * tsrc64[2];
 
       // calculate pairs for second 8 elements (cofactors)
-      tmp[0] = tsrc[2] * tsrc[7];
-      tmp[1] = tsrc[3] * tsrc[6];
-      tmp[2] = tsrc[1] * tsrc[7];
-      tmp[3] = tsrc[3] * tsrc[5];
-      tmp[4] = tsrc[1] * tsrc[6];
-      tmp[5] = tsrc[2] * tsrc[5];
-      tmp[6] = tsrc[0] * tsrc[7];
-      tmp[7] = tsrc[3] * tsrc[4];
-      tmp[8] = tsrc[0] * tsrc[6];
-      tmp[9] = tsrc[2] * tsrc[4];
-      tmp[10] = tsrc[0] * tsrc[5];
-      tmp[11] = tsrc[1] * tsrc[4];
+      tmp64[0] = tsrc64[2] * tsrc64[7];
+      tmp64[1] = tsrc64[3] * tsrc64[6];
+      tmp64[2] = tsrc64[1] * tsrc64[7];
+      tmp64[3] = tsrc64[3] * tsrc64[5];
+      tmp64[4] = tsrc64[1] * tsrc64[6];
+      tmp64[5] = tsrc64[2] * tsrc64[5];
+      tmp64[6] = tsrc64[0] * tsrc64[7];
+      tmp64[7] = tsrc64[3] * tsrc64[4];
+      tmp64[8] = tsrc64[0] * tsrc64[6];
+      tmp64[9] = tsrc64[2] * tsrc64[4];
+      tmp64[10] = tsrc64[0] * tsrc64[5];
+      tmp64[11] = tsrc64[1] * tsrc64[4];
 
       // calculate second 8 elements (cofactors)
-      dst[8] = tmp[0] * tsrc[13] + tmp[3] * tsrc[14] + tmp[4] * tsrc[15];
-      dst[8] -= tmp[1] * tsrc[13] + tmp[2] * tsrc[14] + tmp[5] * tsrc[15];
-      dst[9] = tmp[1] * tsrc[12] + tmp[6] * tsrc[14] + tmp[9] * tsrc[15];
-      dst[9] -= tmp[0] * tsrc[12] + tmp[7] * tsrc[14] + tmp[8] * tsrc[15];
-      dst[10] = tmp[2] * tsrc[12] + tmp[7] * tsrc[13] + tmp[10] * tsrc[15];
-      dst[10] -= tmp[3] * tsrc[12] + tmp[6] * tsrc[13] + tmp[11] * tsrc[15];
-      dst[11] = tmp[5] * tsrc[12] + tmp[8] * tsrc[13] + tmp[11] * tsrc[14];
-      dst[11] -= tmp[4] * tsrc[12] + tmp[9] * tsrc[13] + tmp[10] * tsrc[14];
-      dst[12] = tmp[2] * tsrc[10] + tmp[5] * tsrc[11] + tmp[1] * tsrc[9];
-      dst[12] -= tmp[4] * tsrc[11] + tmp[0] * tsrc[9] + tmp[3] * tsrc[10];
-      dst[13] = tmp[8] * tsrc[11] + tmp[0] * tsrc[8] + tmp[7] * tsrc[10];
-      dst[13] -= tmp[6] * tsrc[10] + tmp[9] * tsrc[11] + tmp[1] * tsrc[8];
-      dst[14] = tmp[6] * tsrc[9] + tmp[11] * tsrc[11] + tmp[3] * tsrc[8];
-      dst[14] -= tmp[10] * tsrc[11] + tmp[2] * tsrc[8] + tmp[7] * tsrc[9];
-      dst[15] = tmp[10] * tsrc[10] + tmp[4] * tsrc[8] + tmp[9] * tsrc[9];
-      dst[15] -= tmp[8] * tsrc[9] + tmp[11] * tsrc[10] + tmp[5] * tsrc[8];
+      dst64[8] = tmp64[0] * tsrc64[13] + tmp64[3] * tsrc64[14] + tmp64[4] * tsrc64[15];
+      dst64[8] -= tmp64[1] * tsrc64[13] + tmp64[2] * tsrc64[14] + tmp64[5] * tsrc64[15];
+      dst64[9] = tmp64[1] * tsrc64[12] + tmp64[6] * tsrc64[14] + tmp64[9] * tsrc64[15];
+      dst64[9] -= tmp64[0] * tsrc64[12] + tmp64[7] * tsrc64[14] + tmp64[8] * tsrc64[15];
+      dst64[10] = tmp64[2] * tsrc64[12] + tmp64[7] * tsrc64[13] + tmp64[10] * tsrc64[15];
+      dst64[10] -= tmp64[3] * tsrc64[12] + tmp64[6] * tsrc64[13] + tmp64[11] * tsrc64[15];
+      dst64[11] = tmp64[5] * tsrc64[12] + tmp64[8] * tsrc64[13] + tmp64[11] * tsrc64[14];
+      dst64[11] -= tmp64[4] * tsrc64[12] + tmp64[9] * tsrc64[13] + tmp64[10] * tsrc64[14];
+      dst64[12] = tmp64[2] * tsrc64[10] + tmp64[5] * tsrc64[11] + tmp64[1] * tsrc64[9];
+      dst64[12] -= tmp64[4] * tsrc64[11] + tmp64[0] * tsrc64[9] + tmp64[3] * tsrc64[10];
+      dst64[13] = tmp64[8] * tsrc64[11] + tmp64[0] * tsrc64[8] + tmp64[7] * tsrc64[10];
+      dst64[13] -= tmp64[6] * tsrc64[10] + tmp64[9] * tsrc64[11] + tmp64[1] * tsrc64[8];
+      dst64[14] = tmp64[6] * tsrc64[9] + tmp64[11] * tsrc64[11] + tmp64[3] * tsrc64[8];
+      dst64[14] -= tmp64[10] * tsrc64[11] + tmp64[2] * tsrc64[8] + tmp64[7] * tsrc64[9];
+      dst64[15] = tmp64[10] * tsrc64[10] + tmp64[4] * tsrc64[8] + tmp64[9] * tsrc64[9];
+      dst64[15] -= tmp64[8] * tsrc64[9] + tmp64[11] * tsrc64[10] + tmp64[5] * tsrc64[8];
 
       // calculate determinant
-      double det = tsrc[0] * dst[0] + tsrc[1] * dst[1] + tsrc[2] * dst[2] + tsrc[3] * dst[3];
+      double det = tsrc64[0] * dst64[0] + tsrc64[1] * dst64[1] + tsrc64[2] * dst64[2] + tsrc64[3] * dst64[3];
 
       // calculate matrix inverse
       det = 1 / det;
       for (int j = 0; j < 16; j++) {
-        dst[j] *= det;
+        dst64[j] *= det;
       }
       preventOptimize++;
     }
@@ -416,12 +480,17 @@ class MatrixInverse : public Base::Benchmark {
 uint64_t MatrixInverse::preventOptimize = 0;
 
 float* MatrixInverse::src = NULL;
+double* MatrixInverse::src64 = NULL;
 float* MatrixInverse::srcx4 = NULL;
 float* MatrixInverse::dst = NULL;
+double* MatrixInverse::dst64 = NULL;
 float* MatrixInverse::dstx4 = NULL;
 float* MatrixInverse::tsrc = NULL;
+double* MatrixInverse::tsrc64 = NULL;
 float* MatrixInverse::tsrcx4 = NULL;
 float* MatrixInverse::tmp = NULL;
+double* MatrixInverse::tmp64 = NULL;
 float* MatrixInverse::ident = NULL;
+double* MatrixInverse::ident64 = NULL;
 
 #endif
